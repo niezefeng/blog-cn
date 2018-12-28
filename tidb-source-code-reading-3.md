@@ -3,8 +3,9 @@ title: TiDB 源码阅读系列文章（三）SQL 的一生
 author: ['申砾']
 date: 2018-03-08
 summary: 本文为 TiDB 源码阅读系列文章的第三篇。本篇文章从 SQL 处理流程出发，介绍哪里是入口，对 SQL 需要做哪些操作，知道一个 SQL 是从哪里进来的，在哪里处理，并从哪里返回。
-tags: ['TiDB','源码阅读']
---- 
+tags: ['源码阅读','TiDB','社区']
+---
+
 
 ## 概述
 上一篇文章讲解了 TiDB 项目的结构以及三个核心部分，本篇文章从 SQL 处理流程出发，介绍哪里是入口，对 SQL 需要做哪些操作，知道一个 SQL 是从哪里进来的，在哪里处理，并从哪里返回。
@@ -29,7 +30,7 @@ SQL 有很多种，比如读、写、修改、删除以及管理类的 SQL，每
 
 + [Session](https://github.com/pingcap/tidb/blob/source-code/session.go#L62)
 
-+ [RecordSet](https://github.com/pingcap/tidb/blob/master/ast/ast.go#L136)
++ [RecordSet](https://github.com/pingcap/tidb/blob/source-code/ast/ast.go#L136)
 
 + [Plan](https://github.com/pingcap/tidb/blob/source-code/plan/plan.go#L30)
 
@@ -157,7 +158,7 @@ Session 中最重要的函数是 [Execute](https://github.com/pingcap/tidb/blob/
 
 我们进入 [Compile 函数](https://github.com/pingcap/tidb/blob/source-code/executor/compiler.go#L37)，可以看到三个重要步骤：
 
-+ `plan.Prepprocess`: 做一些合法性检查以及名字绑定；
++ `plan.Preprocess`: 做一些合法性检查以及名字绑定；
 
 + `plan.Optimize`：制定查询计划，并优化，这个是最核心的步骤之一，后面的文章会重点介绍；
 
@@ -183,7 +184,7 @@ Session 中最重要的函数是 [Execute](https://github.com/pingcap/tidb/blob/
 ```
 
 
-这个结构实现了 [`ast.RecordSet`](https://github.com/pingcap/tidb/blob/master/ast/ast.go#L136) 接口，从字面上大家可以看出，这个接口代表了查询结果集的抽象，我们看一下它的几个方法：
+这个结构实现了 [`ast.RecordSet`](https://github.com/pingcap/tidb/blob/source-code/ast/ast.go#L136) 接口，从字面上大家可以看出，这个接口代表了查询结果集的抽象，我们看一下它的几个方法：
 
 ```
 	// RecordSet is an abstract result set interface to help get data from Plan.

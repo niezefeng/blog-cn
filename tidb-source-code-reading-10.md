@@ -91,7 +91,7 @@ Column 里面的字段非常多，这里先简单介绍一下：
 
 * 往 [offsets](https://github.com/pingcap/tidb/blob/source-code/util/chunk/chunk.go#L324) 中 append 当前 [data](https://github.com/pingcap/tidb/blob/source-code/util/chunk/chunk.go#L325) 的 size 作为下一个元素在 data 中的起始点。
 
-上面第 1 步在 [appendString](https://github.com/pingcap/tidb/blob/source-code/util/chunk/chunk.go#L404) 这个函数中完成，第 2、3 步在 [finishAppendVar](https://github.com/pingcap/tidb/blob/source-code/util/chunk/chunk.go#L398) 这个函数中完成。其他边长类型元素的追加操作也是非常相似，感兴趣的同学可以接着看看 [appendBytes](https://github.com/pingcap/tidb/blob/source-code/util/chunk/chunk.go#L409)、[appendJSON](https://github.com/pingcap/tidb/blob/source-code/util/chunk/chunk.go#L449) 等函数。
+上面第 1 步在 [appendString](https://github.com/pingcap/tidb/blob/source-code/util/chunk/chunk.go#L404) 这个函数中完成，第 2、3 步在 [finishAppendVar](https://github.com/pingcap/tidb/blob/source-code/util/chunk/chunk.go#L398) 这个函数中完成。其他变长类型元素的追加操作也是非常相似，感兴趣的同学可以接着看看 [appendBytes](https://github.com/pingcap/tidb/blob/source-code/util/chunk/chunk.go#L409)、[appendJSON](https://github.com/pingcap/tidb/blob/source-code/util/chunk/chunk.go#L449) 等函数。
 
 #### 1.3  追加一个 NULL 值
 
@@ -113,7 +113,7 @@ Row 提供了获取 Chunk 中数据的方法，比如 [GetInt64](https://github.
 
 ### 3. 使用
 
-目前 Chunk 这个包只对外暴露了 Chunk, Row 等接口，而没有暴露 Column，所以，写数据调用的是在 Chunk 上实现的对 Column 具体函数的 warpper，比如 [AppendInt64](https://github.com/pingcap/tidb/blob/source-code/util/chunk/chunk.go#L230)；读数据调用的是在 Row 上实现的 Getxxx 函数，比如 [GetInt64](https://github.com/pingcap/tidb/blob/source-code/util/chunk/chunk.go#L472)。
+目前 Chunk 这个包只对外暴露了 Chunk, Row 等接口，而没有暴露 Column，所以，写数据调用的是在 Chunk 上实现的对 Column 具体函数的 wrapper，比如 [AppendInt64](https://github.com/pingcap/tidb/blob/source-code/util/chunk/chunk.go#L230)；读数据调用的是在 Row 上实现的 Getxxx 函数，比如 [GetInt64](https://github.com/pingcap/tidb/blob/source-code/util/chunk/chunk.go#L472)。
 
 ## 执行框架简介
 

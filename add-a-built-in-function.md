@@ -3,7 +3,7 @@ title: 十分钟成为 TiDB Contributor 系列 | 添加內建函数
 author: ['申砾']
 date: 2017-03-14
 summary: 最近我们对 TiDB 代码做了些改进，大幅度简化了添加內建函数的流程，这篇教程描述如何为 TiDB 新增 builtin 函数。首先介绍一些必需的背景知识，然后介绍增加 builtin 函数的流程，最后会以一个函数作为示例。
-tags: ['TiDB', 'Contributor', '内建函数', '源码解析']
+tags: ['TiDB', 'Contributor', '内建函数', '源码解析','社区']
 ---
 
 
@@ -32,7 +32,7 @@ SQL 语句发送到 TiDB 后首先会经过 parser，从文本 parse 成为 AST�
 
 3. 在 typeinferer 中添加类型推导信息
 
-    在 plan/typeinferer.go 中的 handleFuncCallExpr() 里面添加这个函数的返回结果类型，请保持和 MySQL 的结果一致。全部类型定义参见 [MySQL Const](https://github.com/pingcap/tidb/blob/master/mysql/type.go#L17)。
+    在 plan/typeinferer.go 中的 handleFuncCallExpr() 里面添加这个函数的返回结果类型，请保持和 MySQL 的结果一致。全部类型定义参见 [MySQL Const](https://github.com/pingcap/tidb/blob/source-code/mysql/type.go#L17)。
 
     > **注意**：大多数函数除了需要填写返回值类型之外，还需要获取返回值的长度。
 

@@ -39,7 +39,7 @@ TiDB 提供完整的分布式事务，事务模型是在 [Google Percolator](htt
 	由于分布式事务要做两阶段提交，并且底层还需要做 Raft 复制，如果一个事务非常大，会使得提交过程非常慢，并且会卡住下面的 Raft 复制流程。为了避免系统出现被卡住的情况，我们对事务的大小做了限制：
 
 	- 单条 KV entry 不超过 6MB
-	- KV entry 的总条数不超过 30w
+	- KV entry 的总条数不超过 30W
 	- KV entry 的总大小不超过 100MB
 
 	在 Google 的 Cloud Spanner 上面，也有[类似的限制](https://cloud.google.com/spanner/docs/limits)。
@@ -86,7 +86,7 @@ TiDB 支持完整的二级索引，并且是全局索引，很多查询可以通
 
 	有两种情况不会涉及到两次访问的问题：
 
-	- 索引中的列已经满足了查询需求。比如 Table t 上面的列 c 有索引，查询是 `select c from t where c > 10`; 这个时候，只需要访问索引，就可以拿到所需要的全部数据。这种情况我们称之为覆盖索引(Covering Index)。所以如果很关注查询性能，可以将部分不需要过滤但是需要再查询结果中返回的列放入索引中，构造成组合索引，比如这个例子： `select c1, c2 from t where c1 > 10`; 要优化这个查询可以创建组合索引 `Index c12 (c1, c2)`。
+	- 索引中的列已经满足了查询需求。比如 Table t 上面的列 c 有索引，查询是 `select c from t where c > 10;`，这个时候，只需要访问索引，就可以拿到所需要的全部数据。这种情况我们称之为覆盖索引(Covering Index)。所以如果很关注查询性能，可以将部分不需要过滤但是需要在查询结果中返回的列放入索引中，构造成组合索引，比如这个例子： `select c1, c2 from t where c1 > 10;`，要优化这个查询可以创建组合索引 `Index c12 (c1, c2)`。
 	- 表的 Primary Key 是整数类型。在这种情况下，TiDB 会将 Primary Key 的值当做行 ID，所以如果查询条件是在 PK 上面，那么可以直接构造出行 ID 的范围，直接扫描 Table 数据，获取结果。
 
 + 查询并发度
@@ -146,10 +146,10 @@ sync-log = true
 上面提到了 TiDB 对单个事务的大小有限制，这层限制是在 KV 层面，反映在 SQL 层面的话，简单来说一行数据会映射为一个 KV entry，每多一个索引，也会增加一个 KV entry，所以这个限制反映在 SQL 层面是：
 
 + 单行数据不大于 6MB
-+ 总的行数*(1 + 索引个数) < 30w
++ 总的行数*(1 + 索引个数) < 30W
 + 一次提交的全部数据小于 100MB
 
-另外注意，无论是大小限制还是行数限制，还要考虑 TiDB 做编码以及事务额外 Key 的开销，在使用的时候，建议每个事务的行数不要超过 1w 行，否则有可能会超过限制，或者是性能不佳。
+> **注意**：无论是大小限制还是行数限制，还要考虑 TiDB 做编码以及事务额外 Key 的开销，在使用的时候，**建议每个事务的行数不超过 200 行，且单行数据小于 100k**，否则可能性能不佳。
 
 建议无论是 Insert，Update 还是 Delete 语句，都通过分 Batch 或者是加 Limit 的方式限制。
 
@@ -160,8 +160,8 @@ sync-log = true
 ```
 for i from 0 to 23:
     while affected_rows > 0:
-	delete * from t where insert_time >= i:00:00 and insert_time < (i+1):00:00 limit 5000;
-	affected_rows = select affected_rows()
+        delete * from t where insert_time >= i:00:00 and insert_time < (i+1):00:00 limit 5000;
+        affected_rows = select affected_rows()
 ```
 
 上面是一段伪代码，意思就是要把大块的数据拆成小块删除，以避免删除过程中前面的 Delete 语句影响后面的 Delete 语句。

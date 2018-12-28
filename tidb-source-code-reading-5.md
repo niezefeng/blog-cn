@@ -3,7 +3,7 @@ title: TiDB 源码阅读系列文章（五）TiDB SQL Parser 的实现
 author: ['马震']
 date: 2018-03-20
 summary: 本文为 TiDB 源码阅读系列文章的第五篇，主要对 SQL Parser 功能的实现进行了讲解。内容来自社区小伙伴——马震（GitHub ID：mz1999 ）的投稿。
-tags: ['TiDB','源码阅读']
+tags: ['TiDB','源码阅读','社区']
 ---
 
 > 本文为 TiDB 源码阅读系列文章的第五篇，主要对 SQL Parser 功能的实现进行了讲解，内容来自社区小伙伴——马震（GitHub ID：mz1999 ）的投稿。
@@ -16,7 +16,7 @@ PingCAP 发布了 TiDB 的[源码阅读系列文章](https://pingcap.com/blog-cn
 
 其中，`SQL Parser` 的功能是把 SQL 语句按照 SQL 语法规则进行解析，将文本转换成抽象语法树（`AST`），这部分功能需要些背景知识才能比较容易理解，我尝试做下相关知识的介绍，希望能对读懂这部分代码有点帮助。
 
-TiDB 是使用 [goyacc](https://github.com/cznic/goyacc) 根据预定义的 SQL 语法规则文件 [parser.y](https://github.com/pingcap/tidb/blob/master/parser/parser.y) 生成 SQL 语法解析器。我们可以在 TiDB 的 [Makefile](https://github.com/pingcap/tidb/blob/50e98f427e7943396dbe38d23178b9f9dc5398b7/Makefile#L50) 文件中看到这个过程，先 build `goyacc` 工具，然后使用 `goyacc` 根据 `parser.y` 生成解析器 `parser.go`：
+TiDB 是使用 [goyacc](https://github.com/cznic/goyacc) 根据预定义的 SQL 语法规则文件 [parser.y](https://github.com/pingcap/tidb/blob/source-code/parser/parser.y) 生成 SQL 语法解析器。我们可以在 TiDB 的 [Makefile](https://github.com/pingcap/tidb/blob/50e98f427e7943396dbe38d23178b9f9dc5398b7/Makefile#L50) 文件中看到这个过程，先 build `goyacc` 工具，然后使用 `goyacc` 根据 `parser.y` 生成解析器 `parser.go`：
 
 ```
 goyacc:
@@ -27,7 +27,7 @@ parser: goyacc
 	bin/goyacc -o parser/parser.go parser/parser.y 2>&1 ...
 ```
 
-[goyacc](https://github.com/cznic/goyacc) 是 [yacc](http://dinosaur.compilertools.net/) 的 Golang 版，所以要想看懂语法规则定义文件 [parser.y](https://github.com/pingcap/tidb/blob/master/parser/parser.y)，了解解析器是如何工作的，先要对 [Lex & Yacc](http://dinosaur.compilertools.net/) 有些了解。
+[goyacc](https://github.com/cznic/goyacc) 是 [yacc](http://dinosaur.compilertools.net/) 的 Golang 版，所以要想看懂语法规则定义文件 [parser.y](https://github.com/pingcap/tidb/blob/source-code/parser/parser.y)，了解解析器是如何工作的，先要对 [Lex & Yacc](http://dinosaur.compilertools.net/) 有些了解。
 
 ## Lex & Yacc 介绍
 
@@ -209,7 +209,7 @@ type yyLexerEx interface {
 }
 ```
 
-TiDB 没有使用类似 `Lex` 的工具生成词法分析器，而是纯手工打造，词法分析器对应的代码是 [parser/lexer.go](https://github.com/pingcap/tidb/blob/master/parser/lexer.go)， 它实现了 `goyacc` 要求的接口：
+TiDB 没有使用类似 `Lex` 的工具生成词法分析器，而是纯手工打造，词法分析器对应的代码是 [parser/lexer.go](https://github.com/pingcap/tidb/blob/source-code/parser/lexer.go)， 它实现了 `goyacc` 要求的接口：
 
 ```
 ...
@@ -244,11 +244,11 @@ func (s *Scanner) Errors() []error {
 ```
 
 
-另外 `lexer` 使用了 `字典树` 技术进行 `token` 识别，具体的实现代码在 [parser/misc.go](https://github.com/pingcap/tidb/blob/master/parser/misc.go)
+另外 `lexer` 使用了 `字典树` 技术进行 `token` 识别，具体的实现代码在 [parser/misc.go](https://github.com/pingcap/tidb/blob/source-code/parser/misc.go)
 
 ## TiDB SQL Parser 的实现
 
-终于到了正题。有了上面的背景知识，对 TiDB 的 `SQL Parser` 模块会相对容易理解一些。TiDB 的词法解析使用的 [手写的解析器](https://github.com/pingcap/tidb/blob/source-code/parser/lexer.go)（这是出于性能考虑），语法解析采用 `goyacc`。先看 SQL 语法规则文件 [parser.y](https://github.com/pingcap/tidb/blob/master/parser/parser.y)，`goyacc` 就是根据这个文件生成SQL语法解析器的。
+终于到了正题。有了上面的背景知识，对 TiDB 的 `SQL Parser` 模块会相对容易理解一些。TiDB 的词法解析使用的 [手写的解析器](https://github.com/pingcap/tidb/blob/source-code/parser/lexer.go)（这是出于性能考虑），语法解析采用 `goyacc`。先看 SQL 语法规则文件 [parser.y](https://github.com/pingcap/tidb/blob/source-code/parser/parser.y)，`goyacc` 就是根据这个文件生成SQL语法解析器的。
 
 `parser.y` 有 6500 多行，第一次打开可能会被吓到，其实这个文件仍然符合我们上面介绍过的结构：
 
@@ -293,7 +293,7 @@ type yySymType struct {
 }
 ```
 
-在语法解析过程中，`非终结符` 会被构造成抽象语法树（`AST`）的节点 [ast.ExprNode](https://github.com/pingcap/tidb/blob/73900c4890dc9708fe4de39021001ca554bc8374/ast/ast.go#L60) 或 [ast.StmtNode](https://github.com/pingcap/tidb/blob/73900c4890dc9708fe4de39021001ca554bc8374/ast/ast.go#L94)。抽象语法树相关的数据结构都定义在 [ast](https://github.com/pingcap/tidb/tree/master/ast) 包中，它们大都实现了 [ast.Node](https://github.com/pingcap/tidb/blob/73900c4890dc9708fe4de39021001ca554bc8374/ast/ast.go#L29) 接口：
+在语法解析过程中，`非终结符` 会被构造成抽象语法树（`AST`）的节点 [ast.ExprNode](https://github.com/pingcap/tidb/blob/73900c4890dc9708fe4de39021001ca554bc8374/ast/ast.go#L60) 或 [ast.StmtNode](https://github.com/pingcap/tidb/blob/73900c4890dc9708fe4de39021001ca554bc8374/ast/ast.go#L94)。抽象语法树相关的数据结构都定义在 [ast](https://github.com/pingcap/tidb/tree/source-code/ast) 包中，它们大都实现了 [ast.Node](https://github.com/pingcap/tidb/blob/73900c4890dc9708fe4de39021001ca554bc8374/ast/ast.go#L29) 接口：
 
 ```
 // Node is the basic element of the AST.
@@ -315,7 +315,7 @@ type Visitor interface {
 }
 ```
 
-例如 [plan.preprocess](https://github.com/pingcap/tidb/blob/master/plan/preprocess.go) 是对 `AST`  做预处理，包括合法性检查以及名字绑定。
+例如 [plan.preprocess](https://github.com/pingcap/tidb/blob/source-code/plan/preprocess.go) 是对 `AST` 做预处理，包括合法性检查以及名字绑定。
 
 `union` 后面是对 `token` 和 `非终结符` 按照类型分别定义：
 
@@ -489,7 +489,7 @@ type SelectStmt struct {
 bin/goyacc -o parser/parser.go parser/parser.y 2>&1
 ```
 
-TiDB 对 `lexer` 和 `parser.go` 进行了封装，对外提供 [parser.yy_parser](https://github.com/pingcap/tidb/blob/master/parser/yy_parser.go)  进行 SQL 语句的解析：
+TiDB 对 `lexer` 和 `parser.go` 进行了封装，对外提供 [parser.yy_parser](https://github.com/pingcap/tidb/blob/source-code/plan/preprocess.go) 进行 SQL 语句的解析：
 
 ```
 // Parse parses a query string to raw ast.StmtNode.
