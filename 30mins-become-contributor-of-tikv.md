@@ -4,6 +4,7 @@ author: ['吴雪莲']
 date: 2018-08-01
 summary: 手把手教你如何在三十分钟内成为 TiKV 项目的 Contributor。
 tags: ['TiKV','社区','Contributor']
+category: community reading
 ---
 
 
