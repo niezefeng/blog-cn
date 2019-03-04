@@ -3,7 +3,7 @@ title: TiDB 源码阅读系列文章（二十二）Hash Aggregation
 author: ['徐怀宇']
 date: 2018-12-21
 summary: 本篇文章将介绍 TiDB 中 Hash Aggregation 的实现原理和细节。
-tags: ['源码阅读','TiDB','社区']
+tags: ['TiDB 源码阅读','TiDB','社区']
 ---
 
 
@@ -57,11 +57,11 @@ Stream Aggregate 的计算需要保证输入数据**按照 `Group-By` 列有序*
 
 | 输入数据 | 是否为新 Group 或所有数据输入完成 | `(sum, count)`| `avg(b)` |
 |:------------|:--------------------------|:----------------|:---------|
-| 1 9 | 是 | (1, 9) | 前一个 Group 为空，不进行计算 |
-| 1 -8 | 否 | (2, 1)|  |
-| 1 5 | 否 | (3, 6) |  |
-| 2 -7 | 是 | (1, -7) | 2 |
-| 2 6 | 否 | (2, -1) |  |
+| 1 9 | 是 | (9, 1) | 前一个 Group 为空，不进行计算 |
+| 1 -8 | 否 | (1, 2)|  |
+| 1 5 | 否 | (6, 3) |  |
+| 2 -7 | 是 | (-7, 1) | 2 |
+| 2 6 | 否 | (-1, 2) |  |
 | 2 4 | 否 | (3, 3) |  |
 |  | 是 |  | 1 |
 
@@ -151,7 +151,7 @@ Hash Aggregation 的执行阶段可分为如下图所示的 5 步：
 
 4. Final Worker 计算最终结果，发送给 Main Thread。
 
-    这部分工作由 [HashAggFinalWorker.run](https://github.com/pingcap/tidb/tree/v2.1.0/executor/aggregate.go#L505) 函数完成。该函数调用 [consumeIntermData](https://github.com/pingcap/tidb/tree/v2.1.0/executor/aggregate.go#L434) 函数 [接收 PartialWorkers 发送来的预聚合结果](https://github.com/pingcap/tidb/tree/v2.1.0/aggregate.go#L443)，进而 [合并](https://github.com/pingcap/tidb/tree/v2.1.0/executor/aggregate.go#L459) 得到最终结果。[getFinalResult](https://github.com/pingcap/tidb/tree/v2.1.0/executor/aggregate.go#L459) 函数完成发送最终结果给 Main Thread。
+    这部分工作由 [HashAggFinalWorker.run](https://github.com/pingcap/tidb/tree/v2.1.0/executor/aggregate.go#L505) 函数完成。该函数调用 [consumeIntermData](https://github.com/pingcap/tidb/tree/v2.1.0/executor/aggregate.go#L434) 函数 [接收 PartialWorkers 发送来的预聚合结果](https://github.com/pingcap/tidb/tree/v2.1.0/executor/aggregate.go#L442)，进而 [合并](https://github.com/pingcap/tidb/tree/v2.1.0/executor/aggregate.go#L459) 得到最终结果。[getFinalResult](https://github.com/pingcap/tidb/tree/v2.1.0/executor/aggregate.go#L459) 函数完成发送最终结果给 Main Thread。
 
 5. Main Thread 接收最终结果并返回。
 
