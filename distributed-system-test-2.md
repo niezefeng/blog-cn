@@ -3,7 +3,7 @@ title: 分布式系统测试那些事儿 - 错误注入
 author: ['刘奇']
 date: 2016-11-10
 summary: 本话题系列文章整理自 PingCAP Infra Meetup 第 26 期刘奇分享的《深度探索分布式系统测试》议题现场实录。文章较长，为方便大家阅读，会分为上中下三篇，本文为中篇。
-tags: ['TiDB', '分布式系统测试']
+tags: ['TiDB', '分布式系统测试', 'Meetup-实录']
 meetup_type: memoir
 ---
 

@@ -3,7 +3,7 @@ title: MPP and SMP in TiDB
 author: ['申砾']
 date: 2016-11-15
 summary: 本篇文章整理自第 21 期 PingCAP Infra Meetup 上申砾分享的《MPP and SMP in TiDB》内容。
-tags: ['TiDB', 'SQL', 'MPP', 'SMP']
+tags: ['TiDB', 'SQL', 'MPP', 'SMP', 'Meetup-实录']
 meetup_type: memoir
 ---
 
