@@ -3,7 +3,7 @@ title: TiDB 中的子查询优化技术
 author: ['韩飞']
 date: 2016-08-01
 summary: 子查询优化一直是 SQL 查询优化中非常难的一部分，尤其是关联子查询的改写。TiDB 为了兼容 MySQL，允许用户在任何位置编写子查询。对于非关联子查询，TiDB 会对其进行提前求值，对于关联子查询，TiDB 会尽可能的对其进行去关联化，例如改写成 SemiJoin。本文会重点介绍 TiDB 对关联子查询的优化手段。
-tags: ['TiDB', 'SQL']
+tags: ['TiDB', 'SQL', 'Meetup-实录']
 meetup_type: memoir
 ---
 
