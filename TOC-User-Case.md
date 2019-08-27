@@ -3,6 +3,8 @@
 ## 目录
 
 - 互联网
+  - [知乎](user-case-zhihu.md)
+  - [小红书](user-case-xiaohongshu.md)
   - [小米](user-case-xiaomi.md)
   - [美团点评](user-case-meituandianping.md)
   - [爱奇艺](user-case-iqiyi.md)
@@ -34,6 +36,9 @@
   - [株式会社 FUNYOURS JAPAN](user-case-funyours-japan.md)
 - 金融
   - [北京银行](user-case-beijing-bank.md)
+  - [平安科技](user-case-pingankeji.md)
+  - [微众银行](user-case-webank.md)
+  - [华泰证券](user-case-huataizhengquan.md)
   - [贝壳金服](user-case-beikejinfu.md)
   - [Ping++](user-case-ping++.md)
   - [360 金融](user-case-360.md)

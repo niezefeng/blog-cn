@@ -22,7 +22,7 @@ tags: ['TiDB 源码阅读','社区']
 
 在 TiDB 中，我们选择了等深直方图，于 1984 年在 [Accurate estimation of the number of tuples satisfying a condition](https://dl.acm.org/citation.cfm?id=602294) 文献中提出。相比于等宽直方图，等深直方图在最坏情况下也可以很好的保证误差。所谓的等深直方图，就是落入每个桶里的值数量尽量相等。举个例子，比方说对于给定的集合 {1.6, 1.9, 1.9, 2.0, 2.4, 2.6, 2.7, 2.7, 2.8, 2.9, 3.4, 3.5}，并且生成 4 个桶，那么最终的等深直方图就会如下图所示，包含四个桶 [1.6, 1.9]，[2.0, 2.6]，[2.7, 2.8]，[2.9, 3.5]，其桶深均为 3。
 
-![1-直方图.png](media/tidb-source-code-reading-12/1.png)
+![1-直方图](media/tidb-source-code-reading-12/1.png)
 
 ### Count-Min Sketch 简介  
 
@@ -30,7 +30,7 @@ Count-Min Sketch 是一种可以处理等值查询，Join 大小估计等的数�
 
 Count-Min Sketch 维护了一个 d*w 的计数数组，对于每一个值，用 d 个独立的 hash 函数映射到每一行的一列中，并对应修改这 d 个位置的计数值。如下图所示：
 
-![2-count-min.png](media/tidb-source-code-reading-12/2.png)
+![2-count-min](media/tidb-source-code-reading-12/2.png)
 
 这样在查询一个值出现了多少次的时候，依旧用 d 个 hash 函数找到每一行中被映射到的位置，取这 d 个值的最小值作为估计值。
 
@@ -88,7 +88,7 @@ Count-Min Sketch 维护了一个 d*w 的计数数组，对于每一个值，用 
 
 ## 统计信息使用
 
-在查询语句中，我们常常会使用一些过滤条件，而统计信息估算的主要作用就是估计经过这些过滤条件后的数据条数，以便优化器选择最优的执行计划。在这篇 [文档](https://github.com/pingcap/docs-cn/blob/master/sql/understanding-the-query-execution-plan.md#explain-%E8%BE%93%E5%87%BA%E6%A0%BC%E5%BC%8F) 中，介绍到 explain 输出结果中会包含的一列 count，即预计当前 operator 会输出的数据条数，便是基于统计信息以及 operator 的执行逻辑估算而来。
+在查询语句中，我们常常会使用一些过滤条件，而统计信息估算的主要作用就是估计经过这些过滤条件后的数据条数，以便优化器选择最优的执行计划。在 [理解 TiDB 执行计划](https://pingcap.com/docs-cn/v3.0/reference/performance/understanding-the-query-execution-plan/#span-id-explain-output-format-explain-输出格式-span) 这篇文档中，介绍到 explain 输出结果中会包含的一列 count，即预计当前 operator 会输出的数据条数，便是基于统计信息以及 operator 的执行逻辑估算而来。
 
 在这个部分中，我们会先从最简单的单一列上的过滤条件开始，然后考虑如何处理多列的情况。  
 

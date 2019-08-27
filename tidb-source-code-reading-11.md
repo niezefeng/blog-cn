@@ -69,7 +69,7 @@ TiDB 的 ILJ 算子是一个多线程的实现，主要的线程有： Main Thea
 
 TiDB 中 ILJ 的执行阶段可划分为如下图所示的 5 步：
 
-![](media/tidb-source-code-reading-11/1.jpeg)
+![ILJ 执行阶段](media/tidb-source-code-reading-11/1.jpeg)
 
 **1\. 启动 Outer Worker 及 Inner Workers**
 
@@ -137,10 +137,10 @@ insert into s value(1),(2),(3),(4);
 select /*+ TIDB_INLJ(t) */ * from t left join s on t.a = s.a;
 ```
 
-在上例中， `t` 为 Outer 表，`s` 为 Inner 表。 [/** TIDN_INLJ */](https://github.com/pingcap/docs-cn/blob/master/sql/tidb-specific.md#tidb_inljt1-t2) 可以让优化器尽可能选择 Index Lookup Join 算法。
+在上例中， `t` 为 Outer 表，`s` 为 Inner 表。 [/** TIDN_INLJ */](https://pingcap.com/docs-cn/v3.0/reference/performance/optimizer-hints/#tidb-inlj-t1-t2) 可以让优化器尽可能选择 Index Lookup Join 算法。
 
 设 Outer 表读数据 batch 的初始大小为 2 行，Inner Worker 数量为 2。
 
 查询语句的一种可能的执行流程如下图所示，其中由上往下箭头表示时间线：
 
-![](media/tidb-source-code-reading-11/2.jpeg)
+![查询语句执行流程图](media/tidb-source-code-reading-11/2.jpeg)

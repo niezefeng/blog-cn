@@ -1,0 +1,20 @@
+version: 2
+
+jobs:
+  lint:
+    docker:
+      - image: circleci/ruby:2.4.1-node
+    working_directory: ~/pingcap/blog-cn
+    steps:
+      - checkout
+
+      - run:
+          name: "Check links"
+          command: |
+            hack/verify-links.sh
+
+workflows:
+  version: 2
+  lint:
+    jobs:
+      - lint

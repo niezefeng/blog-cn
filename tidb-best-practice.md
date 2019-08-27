@@ -38,6 +38,7 @@ TiDB 提供完整的分布式事务，事务模型是在 [Google Percolator](htt
 
 	由于分布式事务要做两阶段提交，并且底层还需要做 Raft 复制，如果一个事务非常大，会使得提交过程非常慢，并且会卡住下面的 Raft 复制流程。为了避免系统出现被卡住的情况，我们对事务的大小做了限制：
 
+    - 单个事务包含的 SQL 语句不超过 5000 条（默认）
 	- 单条 KV entry 不超过 6MB
 	- KV entry 的总条数不超过 30W
 	- KV entry 的总大小不超过 100MB
@@ -92,21 +93,21 @@ TiDB 支持完整的二级索引，并且是全局索引，很多查询可以通
 + 查询并发度
 
 	数据分散在很多 Region 上，所以 TiDB 在做查询的时候会并发进行，默认的并发度比较保守，因为过高的并发度会消耗大量的系统资源，且对于 OLTP 类型的查询，往往不会涉及到大量的数据，较低的并发度已经可以满足需求。对于 OLAP 类型的 Query，往往需要较高的并发度。所以 TiDB 支持通过 System Variable 来调整查询并发度。
-	- [tidb_distsql_scan_concurrency](https://github.com/pingcap/docs-cn/blob/master/sql/tidb-specific.md#tidb_distsql_scan_concurrency)
+	- [tidb_distsql_scan_concurrency](https://pingcap.com/docs-cn/dev/reference/configuration/tidb-server/tidb-specific-variables/#tidb-distsql-scan-concurrency)
 
 		在进行扫描数据的时候的并发度，这里包括扫描 Table 以及索引数据。
 
-	- [tidb_index_lookup_size](https://github.com/pingcap/docs-cn/blob/master/sql/tidb-specific.md#tidb_index_lookup_size)
+	- [tidb_index_lookup_size](https://pingcap.com/docs-cn/dev/reference/configuration/tidb-server/tidb-specific-variables/#tidb-index-lookup-size)
 
 		如果是需要访问索引获取行 ID 之后再访问 Table 数据，那么每次会把一批行 ID 作为一次请求去访问 Table 数据，这个参数可以设置 Batch 的大小，较大的 Batch 会使得延迟增加，较小的 Batch 可能会造成更多的查询次数。这个参数的合适大小与查询涉及的数据量有关。一般不需要调整。
 
-	- [tidb_index_lookup_concurrency](https://github.com/pingcap/docs-cn/blob/master/sql/tidb-specific.md#tidb_index_lookup_concurrency)
+	- [tidb_index_lookup_concurrency](https://pingcap.com/docs-cn/dev/reference/configuration/tidb-server/tidb-specific-variables/#tidb-index-lookup-concurrency)
 
 		如果是需要访问索引获取行 ID 之后再访问 Table 数据，每次通过行 ID 获取数据时候的并发度通过这个参数调节。
 
 + 通过索引保证结果顺序
 
-	索引除了可以用来过滤数据之外，还能用来对数据排序，首先按照索引的顺序获取行 ID，然后再按照行 ID 的返回顺序返回行的内容，这样可以保证返回结果按照索引列有序。前面提到了扫索引和获取 Row 之间是并行 + Pipeline 模式，如果要求按照索引的顺序返回 Row，那么这两次查询之间的并发度设置的太高并不会降低延迟，所以默认的并发度比较保守。可以通过 [tidb_index_serial_scan_concurrency](https://github.com/pingcap/docs-cn/blob/master/sql/tidb-specific.md#tidb_index_serial_scan_concurrency) 变量进行并发度调整。
+	索引除了可以用来过滤数据之外，还能用来对数据排序，首先按照索引的顺序获取行 ID，然后再按照行 ID 的返回顺序返回行的内容，这样可以保证返回结果按照索引列有序。前面提到了扫索引和获取 Row 之间是并行 + Pipeline 模式，如果要求按照索引的顺序返回 Row，那么这两次查询之间的并发度设置的太高并不会降低延迟，所以默认的并发度比较保守。可以通过 [tidb_index_serial_scan_concurrency](https://pingcap.com/docs-cn/dev/reference/configuration/tidb-server/tidb-specific-variables/#tidb-index-serial-scan-concurrency) 变量进行并发度调整。
 
 + 逆序索引
 
@@ -119,18 +120,18 @@ TiDB 支持完整的二级索引，并且是全局索引，很多查询可以通
 
 ### 部署
 
-在部署之前请务必阅读 [TiDB 部署建议以及对硬件的需求](https://github.com/pingcap/docs-cn/blob/master/op-guide/recommendation.md)。
+在部署之前请务必阅读 [TiDB 部署建议以及对硬件的需求](https://pingcap.com/docs-cn/dev/how-to/deploy/hardware-recommendations/)。
 
 推荐通过 [TiDB-Ansible](https://github.com/pingcap/tidb-ansible "TiDB-Ansible")
 部署 TiDB 集群，这个工具可以部署、停止、销毁、升级整个集群，非常方便易用。
 
-具体的使用文档在[这里](https://github.com/pingcap/docs-cn/blob/master/op-guide/ansible-deployment.md)。非常不推荐手动部署，后期的维护和升级会很麻烦。
+具体的使用文档在[这里](https://pingcap.com/docs-cn/dev/how-to/deploy/orchestrated/ansible/)。非常不推荐手动部署，后期的维护和升级会很麻烦。
 
 ### 导入数据
 
 如果有 Unique Key 并且业务端可以保证数据中没有冲突，可以在 Session 内打开这个开关： `SET @@session.tidb_skip_constraint_check=1;`
 
-另外为了提高写入性能，可以对 TiKV 的参数进行调优，具体的文档在[这里](https://github.com/pingcap/docs-cn/blob/master/op-guide/tune-tikv.md)。
+另外为了提高写入性能，可以对 TiKV 的参数进行调优，具体的文档在[这里](https://pingcap.com/docs-cn/v3.0/reference/performance/tune-tikv/)。
 
 请特别注意这个参数：
 
@@ -145,6 +146,7 @@ sync-log = true
 
 上面提到了 TiDB 对单个事务的大小有限制，这层限制是在 KV 层面，反映在 SQL 层面的话，简单来说一行数据会映射为一个 KV entry，每多一个索引，也会增加一个 KV entry，所以这个限制反映在 SQL 层面是：
 
++ 单个事务包含的 SQL 语句不超过 5000 条（默认）
 + 单行数据不大于 6MB
 + 总的行数*(1 + 索引个数) < 30W
 + 一次提交的全部数据小于 100MB
@@ -168,7 +170,7 @@ for i from 0 to 23:
 
 ### 查询
 
-看业务的查询需求以及具体的语句，可以参考[这篇文档](https://github.com/pingcap/docs-cn/blob/master/sql/tidb-specific.md)
+看业务的查询需求以及具体的语句，可以参考[这篇文档](https://pingcap.com/docs-cn/dev/reference/configuration/tidb-server/tidb-specific-variables)
 可以通过 SET 语句控制 SQL 执行的并发度，另外通过 Hint 控制 Join 物理算子选择。
 
 另外 MySQL 标准的索引选择 Hint 语法，也可以用，通过 `Use Index/Ignore Index hint` 控制优化器选择索引。
@@ -177,7 +179,7 @@ for i from 0 to 23:
 
 ### 监控 & 日志
 
-**Metrics 系统是了解系统状态的最佳方法，建议所有的用户都部署监控系统。**TiDB [使用 Grafana+Prometheus 监控系统状态](https://github.com/pingcap/docs-cn/blob/master/op-guide/monitor.md#%E4%BD%BF%E7%94%A8-prometheusgrafana)，如果使用 TiDB-Ansible 部署集群，那么会自动部署和配置监控系统。
+**Metrics 系统是了解系统状态的最佳方法，建议所有的用户都部署监控系统。**TiDB [使用 Grafana+Prometheus 监控系统状态](https://pingcap.com/docs-cn/v3.0/how-to/monitor/overview/)，如果使用 TiDB-Ansible 部署集群，那么会自动部署和配置监控系统。
 
 监控系统中的监控项很多，大部分是给 TiDB 开发者查看的内容，如果没有对源代码比较深入的了解，并没有必要了解这些监控项。我们会精简出一些和业务相关或者是系统关键组件状态相关的监控项，放在一个独立的面板中，供用户使用。
 
@@ -187,8 +189,8 @@ for i from 0 to 23:
 
 了解一个系统或者解决使用中的问题最好的方法是阅读文档，明白实现原理，TiDB 有大量的官方文档，希望大家在遇到问题的时候能先尝试通过文档或者搜索 Issue list 寻找解决方案。官方文档在[这里](https://github.com/pingcap/docs-cn)。如果希望阅读英文文档，可以看[这里](https://github.com/pingcap/docs)。
 
-其中的 [FAQ](https://github.com/pingcap/docs-cn/blob/master/FAQ.md)
-和[故障诊断](https://github.com/pingcap/docs-cn/blob/master/trouble-shooting.md)章节建议大家仔细阅读。另外 TiDB 还有一些不错的工具，也有配套的文档，具体的见各项工具的 GitHub 页面。
+其中的 [FAQ](https://pingcap.com/docs-cn/v3.0/faq/tidb/)
+和[故障诊断](https://pingcap.com/docs-cn/dev/how-to/troubleshoot/cluster-setup/)章节建议大家仔细阅读。另外 TiDB 还有一些不错的工具，也有配套的文档，具体的见各项工具的 GitHub 页面。
 
 除了文档之外，还有很多不错的文章介绍 TiDB 的各项技术细节内幕，大家可以关注下面这些文章发布渠道：
 

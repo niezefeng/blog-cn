@@ -39,7 +39,7 @@ tags: ['TiDB']
 
 在这一版本中，SQL 执行引擎引入新的内部数据表示方式 --- `Chunk`，一个结构中保存一批数据而不仅是一行数据，同一列的数据在内存中连续存放，使得内存使用更紧凑，这样带来了几点好处：1\. 显著减小了内存消耗； 2\. 批量分配内存，减小了 GC 开销；3\. 算子之间可以对数据进行批量传递，减小调用开销；4\. 在某些场景下，可以进行向量计算以及减小 CPU 的 Cache Miss 的情况。
 
-完成上述两项改动之后，TiDB 在 OLAP 场景下的性能有了大幅的质的提升，从 TPC-H 的对比结果[https://github.com/pingcap/docs-cn/blob/master/benchmark/tpch.md](https://github.com/pingcap/docs-cn/blob/master/benchmark/tpch.md) 来看，所有的 Query 在 2.0 中都运行得更快，一些 Query 大多数都有几倍甚至数量级的提升，特别是一些 1.0 中跑不出结果的 Query 在 2.0 中都能顺利执行。
+完成上述两项改动之后，TiDB 在 OLAP 场景下的性能有了大幅的质的提升，从 [TPC-H 的对比结果](https://github.com/pingcap/docs-cn/blob/becd9e76878c9cf507aa626ce96de9dc6c0f85fc/v2.1/benchmark/tpch.md) 来看，所有的 Query 在 2.0 中都运行得更快，一些 Query 大多数都有几倍甚至数量级的提升，特别是一些 1.0 中跑不出结果的 Query 在 2.0 中都能顺利执行。
 
 ![](media/tidb-2.0-ga-release-detail/1.png)
 
@@ -52,14 +52,8 @@ tags: ['TiDB']
 
 在运维方面，我们运维工具做了优化，简化操作流程，降低操作复杂度及操作过程对于线上的影响。同时功能也更加丰富，支持自动部署 Binlog 组件、支持启用 TLS。
 
-## 版本升级
-
-从 TiDB 1.0 到 2.0 可以进行滚动升级，具体步骤可以参考 [这篇文档](https://pingcap.com/docs-cn/op-guide/tidb-v2-upgrade-guide/)。
-
 ## One more thing
 
 **我们也同时发布了 [TiSpark 1.0 GA]( https://github.com/pingcap/tispark/releases/tag/1.0) 版本，了解一下？**
-
-
 
 >点击查看 [TiDB 2.0 GA Release Notes](https://pingcap.com/blog-cn/tidb-2.0ga-release/)
